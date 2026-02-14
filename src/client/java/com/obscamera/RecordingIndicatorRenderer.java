@@ -1,19 +1,17 @@
 package com.obscamera;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 
-public class RecordingIndicatorRenderer implements HudRenderCallback {
+public class RecordingIndicatorRenderer {
 
     private static final int INDICATOR_SIZE = 8; // 小さく変更
     private static final int PADDING = 8;
     private static final int RED_COLOR = 0xFFFF0000; // 赤色
     private static final int DARK_RED_COLOR = 0xFF880000; // 暗い赤色（点滅用）
 
-    @Override
-    public void onHudRender(DrawContext drawContext, RenderTickCounter tickCounter) {
+    public static void render(DrawContext drawContext, RenderTickCounter tickCounter) {
         if (!ActiveStateManager.isActive()) {
             return;
         }
@@ -35,20 +33,20 @@ public class RecordingIndicatorRenderer implements HudRenderCallback {
         // 外側の円（より大きく）
         drawFilledCircle(drawContext, x + INDICATOR_SIZE / 2, y + INDICATOR_SIZE / 2, INDICATOR_SIZE / 2, color);
 
-        // テキスト「録画中」を表示（小さく）
+        // テキスト「配信中」を表示（小さく）
         String text = "配信中";
         int textX = x + INDICATOR_SIZE + 5;
         int textY = y + (INDICATOR_SIZE - 8) / 2; // より小さく
         // スケールを小さくして描画
         var matrices = drawContext.getMatrices();
-        matrices.push();
-        matrices.translate(textX, textY, 0);
-        matrices.scale(0.8f, 0.8f, 1.0f); // 80%サイズ
+        matrices.pushMatrix();
+        matrices.translate(textX, textY);
+        matrices.scale(0.8f, 0.8f); // 80%サイズ
         drawContext.drawText(client.textRenderer, text, 0, 0, color, true);
-        matrices.pop();
+        matrices.popMatrix();
     }
 
-    private void drawFilledCircle(DrawContext context, int centerX, int centerY, int radius, int color) {
+    private static void drawFilledCircle(DrawContext context, int centerX, int centerY, int radius, int color) {
         // 円を四角形の集合として描画（簡易版）
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {

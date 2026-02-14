@@ -3,10 +3,12 @@ package com.obscamera;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class OBSCameraSwitchingModClient implements ClientModInitializer {
@@ -20,7 +22,7 @@ public class OBSCameraSwitchingModClient implements ClientModInitializer {
                 "key.obscameraswitching.switch_camera",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
-                "category.obscameraswitching.general"));
+                new KeyBinding.Category(Identifier.of(OBSCameraSwitchingMod.MOD_ID, "general"))));
 
         // クライアントティックイベントでキー押下を検出
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -33,7 +35,11 @@ public class OBSCameraSwitchingModClient implements ClientModInitializer {
         });
 
         // HUD描画の登録（録画中インジケーター）
-        HudRenderCallback.EVENT.register(new RecordingIndicatorRenderer());
+        HudElementRegistry.attachElementAfter(
+                VanillaHudElements.MISC_OVERLAYS,
+                Identifier.of(OBSCameraSwitchingMod.MOD_ID, "recording_indicator"),
+                RecordingIndicatorRenderer::render
+        );
 
         // クライアントネットワークハンドラー登録
         com.obscamera.network.ClientNetworkHandler.registerClientReceivers();
